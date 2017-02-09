@@ -1,4 +1,6 @@
 var mysql = require('mysql');
+var async = require('async');
+
 
 var connection = mysql.createConnection({
   host     : 'localhost',
@@ -15,8 +17,30 @@ var getArticles = function() {
 			return;
 		}
 
-		console.log(results);
+		// console.log(results);
+
+		async.eachSeries(results, function(result, callback) {
+			console.log("\n\n", result);
+			scrapeData(result, callback);
+		}, function(){
+			console.log("All urls processed");
+		});
 	});
-}; 
+};
+
+var scrapeData = function(row, callback) {
+	var data = {
+		title: '',
+		body: '',
+		created_at: '',
+		author: ''
+	};
+
+	console.log(data);
+
+	callback();
+};
+
+
 
 getArticles();
