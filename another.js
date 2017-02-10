@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
 });
 
 var getArticles = function() {
-	var sql = "SELECT * FROM links LIMIT 2";
+	var sql = "SELECT * FROM links";
 	connection.query(sql, function(error, results, fields) {
 		if (error) {
 			console.log(error);
@@ -47,7 +47,7 @@ var scrapeData = function(row,callback) {
 			switch(row.providers_id){
 				case 8:
 					var data = {
-						title : $('h1.heading').text(),
+						title : $('h1.heading1').text(),
 			    		description : $('div.fsynop').text(),
 			    		created : $('div.sheading').find("span").text(),
 			    		author : $("span").find("a").text()
@@ -73,10 +73,18 @@ var scrapeData = function(row,callback) {
     	var created = data['created'];
     	var author = data['author'];
 		var query = "INSERT INTO articles (title,body,author,CreatedDateTime,links_id) VALUES ";
-		query = query + "('"+title+"','"+description+"','"+created+"','"+author+"','"+row.id+"'),";
-		   console.log(query);
-		   //callback();
-	};
+		query = query + "('"+title+"','"+description+"','"+author+"','"+created+"','"+row.id+"'),";
+		   //console.log(query);    ,
+		var n = query.lastIndexOf(",");
+        var query = query.substring(0,n); 
+        //console.log(query);
+	  	connection.query(query, function(err,result) {
+	        console.log("Executed query for url", row.providers_id, "got error", err);
+	        //callback();
+	    });
+		   callback();
+	};       
+
 
 };
 								
