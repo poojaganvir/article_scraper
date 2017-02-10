@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
 });
 
 var getArticles = function() {
-	var sql = "SELECT * FROM links";
+	var sql = "SELECT * FROM links LIMIT 2";
 	connection.query(sql, function(error, results, fields) {
 		if (error) {
 			console.log(error);
@@ -23,6 +23,7 @@ var getArticles = function() {
 		async.eachSeries(results, function(result, callback) {
 			//console.log("\n\n", result);
 			scrapeData(result,callback);
+			
 		}, function(){
 			console.log("All urls processed");
 		});
@@ -36,7 +37,11 @@ var scrapeData = function(row,callback) {
 	    if (error) {
 	        return console.error('upload failed:', error);
 	    }
+	    data = getData(body);
+	    saveArticles(data,row,callback);
 
+    });
+	 	var getData = function(body){
 	     	var $ = cheerio.load(body);
 			//console.log(row.url);
 			switch(row.providers_id){
@@ -58,10 +63,24 @@ var scrapeData = function(row,callback) {
 			    	};
 			    break;
 			}
-			console.log("scrapeData:",data);
-    });
+			//console.log("scrapeData:",data);
+			return data;
+		};
+	//callback();
+    var saveArticles = function(data,row,callback){
+    	var title = data['title'];
+    	var description = data['description'];
+    	var created = data['created'];
+    	var author = data['author'];
+		var query = "INSERT INTO articles (title,body,author,CreatedDateTime,links_id) VALUES ";
+		query = query + "('"+title+"','"+description+"','"+created+"','"+author+"','"+row.id+"'),";
+		   console.log(query);
+		   //callback();
+	};
 
-}									
+};
+								
 
 getArticles();
+
 
